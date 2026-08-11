@@ -1,0 +1,4 @@
+interface:
+  display_name: "PPTGen 双版本生成器"
+  short_description: "先生成图文整页，再输出图片版与文字可编辑版 PPT"
+  default_prompt: "Use $pptgen to create matching image-based and text-editable PowerPoint versions from my source material."
