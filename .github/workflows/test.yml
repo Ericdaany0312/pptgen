@@ -1,0 +1,40 @@
+name: Test
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Run unit tests
+        run: python -m unittest discover -s pptgen/tests -v
+      - name: Validate template spec
+        run: >-
+          python pptgen/scripts/validate_dual_spec.py
+          --spec pptgen/assets/templates/dual_spec.json
+          --stage plan
+      - name: Validate skill frontmatter
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import yaml
+
+          content = Path("pptgen/SKILL.md").read_text(encoding="utf-8")
+          _, frontmatter, _ = content.split("---", 2)
+          metadata = yaml.safe_load(frontmatter)
+          assert metadata["name"] == "pptgen"
+          assert isinstance(metadata["description"], str) and metadata["description"].strip()
+          print("Skill frontmatter is valid")
+          PY
